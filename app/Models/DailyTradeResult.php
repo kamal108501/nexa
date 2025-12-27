@@ -4,40 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TradeExecution extends Model
+class DailyTradeResult extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
         'daily_trade_plan_id',
-        'execution_status',
-        'entry_price',
-        'entry_time',
         'exit_price',
         'exit_time',
-        'exit_reason',
-        'executed_quantity',
-        'is_active',
+        'pnl_amount',
+        'pnl_percent',
+        'result',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
 
     protected $casts = [
-        'entry_time' => 'datetime',
-        'exit_time'  => 'datetime',
+        'exit_time' => 'datetime',
     ];
 
-    /* ---------------- Relationships ---------------- */
-
-    public function tradePlan()
+    public function tradePlan(): BelongsTo
     {
         return $this->belongsTo(DailyTradePlan::class, 'daily_trade_plan_id');
-    }
-
-    public function result()
-    {
-        return $this->hasOne(TradeResult::class);
     }
 }

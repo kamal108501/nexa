@@ -22,7 +22,12 @@ class TradingSymbolResource extends Resource
 {
     protected static ?string $model = TradingSymbol::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    // Use a relevant Filament Heroicon for trading symbols, e.g. 'heroicon-o-chart-bar'
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Trading';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 

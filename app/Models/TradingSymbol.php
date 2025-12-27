@@ -10,64 +10,35 @@ class TradingSymbol extends Model
 {
     use SoftDeletes;
 
-    /**
-     * Explicit table name
-     * (Model name ≠ table name is perfectly valid)
-     */
-    protected $table = 'symbols';
-
-    /**
-     * Mass assignable attributes
-     */
     protected $fillable = [
         'symbol_code',
-        'symbol_name',
-        'instrument_category', // equity, index, commodity
-        'instrument_type',     // stock, option, future
-        'exchange',            // NSE, MCX
+        'name',
+        'segment',
         'lot_size',
         'tick_size',
-        'is_tradable',
         'is_active',
         'created_by',
         'updated_by',
         'deleted_by',
     ];
 
-    /**
-     * Attribute casting
-     */
-    protected $casts = [
-        'is_tradable' => 'boolean',
-        'is_active'   => 'boolean',
-    ];
-
-    /* -------------------------------------------------
-     | Relationships
-     |--------------------------------------------------
-     */
-
-    /**
-     * One symbol → many option contracts
-     */
     public function optionContracts(): HasMany
     {
-        return $this->hasMany(OptionContract::class, 'symbol_id');
+        return $this->hasMany(OptionContract::class);
     }
 
-    /**
-     * One symbol → many daily trend analyses
-     */
-    public function dailyTrendAnalyses(): HasMany
+    public function dailyTrendLogs(): HasMany
     {
-        return $this->hasMany(DailyTrendAnalysis::class, 'symbol_id');
+        return $this->hasMany(DailyTrendLog::class);
     }
 
-    /**
-     * One symbol → many daily trade plans
-     */
     public function dailyTradePlans(): HasMany
     {
-        return $this->hasMany(DailyTradePlan::class, 'symbol_id');
+        return $this->hasMany(DailyTradePlan::class);
+    }
+
+    public function stockTips(): HasMany
+    {
+        return $this->hasMany(StockTip::class);
     }
 }

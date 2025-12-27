@@ -4,32 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DailyTradePlan extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id',
         'trade_date',
-        'trade_sequence',
-        'daily_trend_analysis_id',
         'symbol_id',
         'option_contract_id',
-        'instrument_type',
-        'trade_direction',
-        'trade_duration',
+        'current_price',
         'planned_entry_price',
-        'planned_stop_loss',
-        'planned_target_price',
-        'planned_quantity',
-        'planned_investment',
-        'planned_risk_amount',
-        'planned_reward_amount',
-        'risk_reward_ratio',
-        'plan_status',
-        'plan_notes',
-        'is_active',
+        'stop_loss',
+        'target_price',
+        'quantity',
+        'expected_profit',
+        'expected_loss',
+        'expected_return_percent',
+        'status',
+        'notes',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -39,35 +34,18 @@ class DailyTradePlan extends Model
         'trade_date' => 'date',
     ];
 
-    /* ---------------- Relationships ---------------- */
-
-    public function user()
+    public function symbol(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
     }
 
-    public function symbol()
-    {
-        return $this->belongsTo(TradingSymbol::class);
-    }
-
-    public function optionContract()
+    public function optionContract(): BelongsTo
     {
         return $this->belongsTo(OptionContract::class);
     }
 
-    public function trendAnalysis()
+    public function result(): HasOne
     {
-        return $this->belongsTo(DailyTrendAnalysis::class, 'daily_trend_analysis_id');
-    }
-
-    public function execution()
-    {
-        return $this->hasOne(TradeExecution::class);
-    }
-
-    public function result()
-    {
-        return $this->hasOne(TradeResult::class);
+        return $this->hasOne(DailyTradeResult::class);
     }
 }

@@ -11,6 +11,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -20,53 +21,24 @@ class TradingSymbolsTable
     {
         return $table
             ->columns([
-                TextColumn::make('symbol_code')
-                    ->searchable(),
-                TextColumn::make('symbol_name')
-                    ->searchable(),
-                TextColumn::make('instrument_category')
-                    ->badge(),
-                TextColumn::make('instrument_type')
-                    ->badge(),
-                TextColumn::make('exchange')
-                    ->badge(),
-                TextColumn::make('lot_size')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('tick_size')
-                    ->numeric()
-                    ->sortable(),
-                IconColumn::make('is_tradable')
-                    ->boolean(),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                // TextColumn::make('created_by')
-                //     ->numeric()
-                //     ->sortable(),
-                // TextColumn::make('updated_by')
-                //     ->numeric()
-                //     ->sortable(),
-                // TextColumn::make('deleted_by')
-                //     ->numeric()
-                //     ->sortable(),
-                // TextColumn::make('created_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                // TextColumn::make('updated_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                // TextColumn::make('deleted_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('symbol_code')->label('Symbol Code')->searchable(),
+                TextColumn::make('name')->label('Name')->searchable(),
+                TextColumn::make('segment')->label('Segment')->badge(),
+                TextColumn::make('lot_size')->label('Lot Size')->numeric()->sortable(),
+                TextColumn::make('tick_size')->label('Tick Size')->numeric()->sortable(),
+                ToggleColumn::make('is_active')->label('Active')->alignCenter(),
+                // TextColumn::make('created_by')->label('Created By')->sortable()->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('updated_by')->label('Updated By')->sortable()->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('deleted_by')->label('Deleted By')->sortable()->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('created_at')->label('Created At')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('updated_at')->label('Updated At')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('deleted_at')->label('Deleted At')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
+                // TrashedFilter::make(),
             ])
             ->recordActions([
-                ViewAction::make(),
+                // ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
