@@ -40,6 +40,8 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+                TradesPerStockChart::class,
+                ProfitLossOverTimeChart::class
             ])
             ->middleware([
                 EncryptCookies::class,

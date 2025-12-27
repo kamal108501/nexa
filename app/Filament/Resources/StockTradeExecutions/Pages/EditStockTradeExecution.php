@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\StockTipResults\Pages;
+namespace App\Filament\Resources\StockTradeExecutions\Pages;
 
-use App\Filament\Resources\StockTipResults\StockTipResultResource;
+use App\Filament\Resources\StockTradeExecutions\StockTradeExecutionResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditStockTipResult extends EditRecord
+class EditStockTradeExecution extends EditRecord
 {
-    protected static string $resource = StockTipResultResource::class;
+    protected static string $resource = StockTradeExecutionResource::class;
 
     protected function getHeaderActions(): array
     {

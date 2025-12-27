@@ -1,31 +1,35 @@
 <?php
 
-namespace App\Filament\Resources\StockTipResults\Schemas;
+namespace App\Filament\Resources\StockTradeExecutions\Schemas;
 
-use App\Models\StockTipResult;
+use App\Models\StockTradeExecution;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
-class StockTipResultInfolist
+class StockTradeExecutionInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextEntry::make('stockTip.id')
-                    ->label('Stock tip'),
-                TextEntry::make('exit_price')
-                    ->money(),
-                TextEntry::make('exit_date')
-                    ->date(),
-                TextEntry::make('pnl_amount')
+                TextEntry::make('symbol_id')
                     ->numeric(),
-                TextEntry::make('pnl_percent')
-                    ->numeric(),
-                TextEntry::make('exit_reason')
+                TextEntry::make('stock_tip_id')
+                    ->numeric()
+                    ->placeholder('-'),
+                TextEntry::make('execution_type')
                     ->badge(),
-                IconEntry::make('is_correct')
+                TextEntry::make('quantity')
+                    ->numeric(),
+                TextEntry::make('price')
+                    ->money('INR'),
+                TextEntry::make('execution_date')
+                    ->date(),
+                TextEntry::make('execution_notes')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                IconEntry::make('is_active')
                     ->boolean(),
                 TextEntry::make('created_by')
                     ->numeric()
@@ -44,7 +48,7 @@ class StockTipResultInfolist
                     ->placeholder('-'),
                 TextEntry::make('deleted_at')
                     ->dateTime()
-                    ->visible(fn (StockTipResult $record): bool => $record->trashed()),
+                    ->visible(fn(StockTradeExecution $record): bool => $record->trashed()),
             ]);
     }
 }

@@ -36,9 +36,4 @@ class StockTip extends Model
     {
         return $this->belongsTo(TradingSymbol::class, 'symbol_id');
     }
-
-    public function result(): HasOne
-    {
-        return $this->hasOne(StockTipResult::class);
-    }
 }
