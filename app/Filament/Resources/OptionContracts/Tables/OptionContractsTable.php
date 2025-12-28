@@ -21,9 +21,8 @@ class OptionContractsTable
     {
         return $table
             ->columns([
-                TextColumn::make('symbol.symbol_code')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('symbol.name')
+                    ->searchable(),
                 TextColumn::make('expiry_date')
                     ->date()
                     ->sortable(),

@@ -19,6 +19,7 @@ class OptionContract extends Model
         'lot_size',
         'is_weekly',
         'is_active',
+        'contract_code',
         'created_by',
         'updated_by',
         'deleted_by',

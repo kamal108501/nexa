@@ -2,74 +2,147 @@
 
 namespace App\Filament\Resources\OptionContracts\Schemas;
 
+use App\Models\TradingSymbol;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
 
 class OptionContractForm
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Select::make('symbol')
-                    ->options([
-                        'NIFTY' => 'NIFTY',
-                        'SENSEX' => 'SENSEX',
-                        'BANKNIFTY' => 'BANKNIFTY',
-                        'RELIANCE' => 'RELIANCE',
-                        'TCS' => 'TCS',
-                    ])
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        $today = Carbon::today();
-
-                        match ($state) {
-                            'NIFTY' => $set('expiry_date', $today->next(Carbon::TUESDAY)),
-                            'SENSEX' => $set('expiry_date', $today->next(Carbon::THURSDAY)),
-                            'BANKNIFTY' => $set(
-                                'expiry_date',
-                                $today->copy()->endOfMonth()->previous(Carbon::THURSDAY)
-                            ),
-                            default => $set('expiry_date', $today),
-                        };
-                    }),
-                DatePicker::make('expiry_date')
-                    ->required()
-                    ->default(now()),
-                TextInput::make('strike_price')
-                    ->required()
-                    ->numeric(),
-                // ->prefix('Rs'),
-                Select::make('option_type')
-                    ->options(['CE' => 'CE', 'PE' => 'PE'])
-                    ->required(),
-                TextInput::make('lot_size')
-                    ->required()
-                    ->numeric(),
-                // TextInput::make('tick_size')
-                //     ->numeric()
-                //     ->default(null),
-                TextInput::make('contract_code')
-                    ->default(null),
-                Toggle::make('is_weekly')
-                    // ->required()
-                    ->default(true),
-                // Toggle::make('is_active')
-                //     ->required(),
-                // TextInput::make('created_by')
-                //     ->numeric()
-                //     ->default(null),
-                // TextInput::make('updated_by')
-                //     ->numeric()
-                //     ->default(null),
-                // TextInput::make('deleted_by')
-                //     ->numeric()
-                //     ->default(null),
-            ]);
+        return $schema->components([
+            Section::make('Option Contract Details')
+                ->columnSpanFull()
+                ->schema([
+                    Grid::make([
+                        'default' => 1,
+                        'md' => 3,
+                    ])->schema([
+                        Select::make('symbol_id')
+                            ->relationship(
+                                name: 'symbol',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn(Builder $query) =>
+                                $query->whereIn('segment', ['INDEX', 'COMMODITY'])
+                                    ->where('is_active', 1)
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $symbol = \App\Models\TradingSymbol::find($state);
+                                if ($symbol) {
+                                    $name = strtolower($symbol->name);
+                                    $baseCode = $symbol->symbol_code;
+                                    $strike = $get('strike_price');
+                                    $optionType = $get('option_type');
+                                    $expiry = null;
+                                    $isWeekly = 0;
+                                    if ($name === 'nifty 50') {
+                                        $expiryDate = \Carbon\Carbon::now()->next(2); // Tuesday
+                                        $expiry = $expiryDate->format('d-m-Y');
+                                        $isWeekly = 1;
+                                    } elseif ($name === 'bank nifty') {
+                                        // Last Thursday of this month
+                                        $now = \Carbon\Carbon::now();
+                                        $lastThursday = $now->copy()->endOfMonth()->previous(4); // 4 = Thursday
+                                        if ($now->greaterThan($lastThursday)) {
+                                            // Next month's last Thursday
+                                            $lastThursday = $now->copy()->addMonth()->endOfMonth()->previous(4);
+                                        }
+                                        $expiry = $lastThursday->format('d-m-Y');
+                                    } elseif ($name === 'sensex') {
+                                        $expiryDate = \Carbon\Carbon::now()->next(4); // Tuesday
+                                        $expiry = $expiryDate->format('d-m-Y');
+                                        $isWeekly = 1;
+                                    } elseif (str_contains($name, 'natural gas')) {
+                                        // Natural Gas expiry: 26th of current month, or next month if today > 26th
+                                        $now = \Carbon\Carbon::now();
+                                        $expiryDate = $now->copy()->day(26);
+                                        if ($now->greaterThan($expiryDate)) {
+                                            $expiryDate = $now->copy()->addMonth()->day(26);
+                                        }
+                                        $expiry = $expiryDate->format('d-m-Y');
+                                    } elseif (str_contains($name, 'crude oil')) {
+                                        // Crude Oil expiry: 19th of current month, or next month if today > 19th
+                                        $now = \Carbon\Carbon::now();
+                                        $expiryDate = $now->copy()->day(19);
+                                        if ($now->greaterThan($expiryDate)) {
+                                            $expiryDate = $now->copy()->addMonth()->day(19);
+                                        }
+                                        $expiry = $expiryDate->format('d-m-Y');
+                                    }
+                                    if ($expiry) {
+                                        $set('expiry_date', $expiry);
+                                    }
+                                    if (!is_null($isWeekly)) {
+                                        $set('is_weekly', $isWeekly);
+                                    }
+                                    $set('lot_size', $symbol->lot_size);
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
+                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    $set('contract_code', $contractCode);
+                                }
+                            }),
+                        DatePicker::make('expiry_date')
+                            ->required()
+                            ->default(now()),
+                        TextInput::make('strike_price')
+                            ->required()
+                            ->numeric()
+                            ->reactive()
+                            ->debounce(500)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $symbolId = $get('symbol_id');
+                                $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
+                                if ($symbol) {
+                                    $name = strtolower($symbol->name);
+                                    $baseCode = $symbol->symbol_code;
+                                    $strike = $state;
+                                    $optionType = $get('option_type');
+                                    $expiry = $get('expiry_date');
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
+                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    $set('contract_code', $contractCode);
+                                }
+                            }),
+                        Select::make('option_type')
+                            ->options(['CE' => 'CE', 'PE' => 'PE'])
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                $symbolId = $get('symbol_id');
+                                $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
+                                if ($symbol) {
+                                    $name = strtolower($symbol->name);
+                                    $baseCode = $symbol->symbol_code;
+                                    $strike = $get('strike_price');
+                                    $optionType = $state;
+                                    $expiry = $get('expiry_date');
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
+                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    $set('contract_code', $contractCode);
+                                }
+                            }),
+                        TextInput::make('lot_size')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('contract_code')
+                            ->required()
+                            ->default(null),
+                        Toggle::make('is_weekly')
+                            ->default(true),
+                    ]),
+                ]),
+        ]);
     }
 }
