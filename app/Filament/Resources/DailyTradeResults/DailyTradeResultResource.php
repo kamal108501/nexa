@@ -22,9 +22,8 @@ class DailyTradeResultResource extends Resource
 {
     protected static ?string $model = DailyTradeResult::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string|\UnitEnum|null $navigationGroup = 'Trading';
 
     public static function form(Schema $schema): Schema
     {

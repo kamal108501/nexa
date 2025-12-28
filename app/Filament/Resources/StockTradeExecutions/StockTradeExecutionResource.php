@@ -22,10 +22,7 @@ class StockTradeExecutionResource extends Resource
 {
     protected static ?string $model = StockTradeExecution::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    protected static ?string $recordTitleAttribute = 'name';
-
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
     protected static string|\UnitEnum|null $navigationGroup = 'Trading';
 
     protected static ?int $navigationSort = 4;

@@ -22,8 +22,7 @@ class StockTipResource extends Resource
 {
     protected static ?string $model = StockTip::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-light-bulb';
     protected static string|\UnitEnum|null $navigationGroup = 'Trading';
 
     protected static ?int $navigationSort = 3;
