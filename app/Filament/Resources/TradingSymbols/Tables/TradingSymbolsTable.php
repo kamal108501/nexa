@@ -23,6 +23,7 @@ class TradingSymbolsTable
             ->columns([
                 TextColumn::make('symbol_code')->label('Symbol Code')->searchable(),
                 TextColumn::make('name')->label('Name')->searchable(),
+                TextColumn::make('exchange')->label('Exchange')->sortable(),
                 TextColumn::make('segment')->label('Segment')->badge(),
                 TextColumn::make('lot_size')->label('Lot Size')->numeric()->sortable(),
                 TextColumn::make('tick_size')->label('Tick Size')->numeric()->sortable(),

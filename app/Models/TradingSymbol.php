@@ -13,6 +13,7 @@ class TradingSymbol extends Model
     protected $fillable = [
         'symbol_code',
         'name',
+        'exchange',
         'segment',
         'lot_size',
         'tick_size',

@@ -27,7 +27,7 @@ class OptionContractsTable
                     ->date()
                     ->sortable(),
                 TextColumn::make('strike_price')
-                    ->money('INR')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('option_type')
                     ->badge()

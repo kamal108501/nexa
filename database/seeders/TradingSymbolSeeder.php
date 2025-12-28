@@ -3,95 +3,82 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\TradingSymbol;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TradingSymbolSeeder extends Seeder
 {
     public function run(): void
     {
         $symbols = [
-
-            // =======================
-            // INDEX
-            // =======================
             [
                 'symbol_code' => 'NIFTY',
-                'name'        => 'NIFTY 50',
+                'name'        => 'Nifty 50',
                 'segment'     => 'INDEX',
+                'exchange'    => 'NSE',
                 'lot_size'    => 75,
                 'tick_size'   => 0.05,
-                'is_active'   => true,
             ],
             [
                 'symbol_code' => 'BANKNIFTY',
-                'name'        => 'BANK NIFTY',
+                'name'        => 'Bank Nifty',
                 'segment'     => 'INDEX',
+                'exchange'    => 'NSE',
                 'lot_size'    => 15,
                 'tick_size'   => 0.05,
-                'is_active'   => true,
             ],
             [
                 'symbol_code' => 'SENSEX',
-                'name'        => 'SENSEX',
+                'name'        => 'Sensex',
                 'segment'     => 'INDEX',
+                'exchange'    => 'BSE',
                 'lot_size'    => 10,
                 'tick_size'   => 0.05,
-                'is_active'   => true,
             ],
-
-            // =======================
-            // COMMODITIES (MCX)
-            // =======================
             [
                 'symbol_code' => 'CRUDEOIL',
                 'name'        => 'Crude Oil',
                 'segment'     => 'COMMODITY',
+                'exchange'    => 'MCX',
                 'lot_size'    => 100,
                 'tick_size'   => 1,
-                'is_active'   => true,
             ],
             [
                 'symbol_code' => 'NATURALGAS',
                 'name'        => 'Natural Gas',
                 'segment'     => 'COMMODITY',
+                'exchange'    => 'MCX',
                 'lot_size'    => 1250,
                 'tick_size'   => 0.05,
-                'is_active'   => true,
-            ],
-
-            // =======================
-            // CRYPTO
-            // =======================
-            [
-                'symbol_code' => 'BTCUSD',
-                'name'        => 'Bitcoin / USD',
-                'segment'     => 'CRYPTO',
-                'lot_size'    => 1,      // treated as 1 unit
-                'tick_size'   => 0.01,
-                'is_active'   => true,
             ],
             [
-                'symbol_code' => 'ETHUSD',
-                'name'        => 'Ethereum / USD',
-                'segment'     => 'CRYPTO',
+                'symbol_code' => 'RELIANCE',
+                'name'        => 'Reliance Industries Ltd',
+                'segment'     => 'STOCK',
+                'exchange'    => 'NSE',
                 'lot_size'    => 1,
-                'tick_size'   => 0.01,
-                'is_active'   => true,
+                'tick_size'   => 0.05,
             ],
             [
-                'symbol_code' => 'XRPUSD',
-                'name'        => 'Ripple / USD',
-                'segment'     => 'CRYPTO',
+                'symbol_code' => 'TCS',
+                'name'        => 'Tata Consultancy Services',
+                'segment'     => 'STOCK',
+                'exchange'    => 'NSE',
                 'lot_size'    => 1,
-                'tick_size'   => 0.0001,
-                'is_active'   => true,
+                'tick_size'   => 0.05,
             ],
         ];
 
         foreach ($symbols as $symbol) {
-            TradingSymbol::updateOrCreate(
-                ['symbol_code' => $symbol['symbol_code']],
-                $symbol
+            DB::table('trading_symbols')->updateOrInsert(
+                ['symbol_code' => $symbol['symbol_code']], // unique key
+                array_merge($symbol, [
+                    'is_active'  => 1,
+                    'updated_by' => 1,
+                    'created_by' => 1,
+                    'updated_at' => Carbon::now(),
+                    'created_at' => Carbon::now(),
+                ])
             );
         }
     }

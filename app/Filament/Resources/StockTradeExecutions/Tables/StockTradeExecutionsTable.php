@@ -44,7 +44,7 @@ class StockTradeExecutionsTable
                     ->sortable(),
 
                 TextColumn::make('price')
-                    ->money('INR')
+                    ->numeric()
                     ->sortable(),
 
                 TextColumn::make('execution_date')
@@ -82,10 +82,24 @@ class StockTradeExecutionsTable
                         }
                         $avgBuyPrice = $totalBuyCost / $sellQty;
                         $profitLoss = ($record->price - $avgBuyPrice) * $sellQty;
-                        return number_format($profitLoss, 2);
+                        // Return as float for badge color logic, but display as int if no decimals, else 2 decimals
+                        // Always show as float with 2 decimals for clarity, including negatives
+                        return round($profitLoss, 2);
                     })
                     ->badge()
-                    ->color(fn($state) => is_numeric($state) && $state >= 0 ? 'success' : 'danger'),
+                    ->color(function ($state) {
+                        if (!is_numeric($state)) {
+                            return 'gray'; // partial or not calculated
+                        }
+                        $value = floatval($state);
+                        if ($value > 0) {
+                            return 'success'; // green for profit
+                        } elseif ($value === 0.0) {
+                            return 'gray'; // gray for exact zero
+                        } else {
+                            return 'danger'; // red for loss
+                        }
+                    }),
 
                 /* ================= GROUP SUMMARY ================= */
 
@@ -99,8 +113,7 @@ class StockTradeExecutionsTable
                                 ->get()
                                 ->sum(fn($e) => $e->quantity * $e->price);
                         }),
-                    ])
-                    ->money('INR'),
+                    ]),
 
                 TextColumn::make('realized_pnl')
                     ->label('P / L')
@@ -130,7 +143,6 @@ class StockTradeExecutionsTable
                             return round($sellAmt - ($avgBuy * $sellQty), 2);
                         }),
                     ])
-                    ->money('INR')
                     ->badge()
                     ->color(fn($state) => $state >= 0 ? 'success' : 'danger'),
 

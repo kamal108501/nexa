@@ -52,11 +52,9 @@ class OptionContractForm
                                         $expiry = $expiryDate->format('d-m-Y');
                                         $isWeekly = 1;
                                     } elseif ($name === 'bank nifty') {
-                                        // Last Thursday of this month
                                         $now = \Carbon\Carbon::now();
-                                        $lastThursday = $now->copy()->endOfMonth()->previous(4); // 4 = Thursday
+                                        $lastThursday = $now->copy()->endOfMonth()->previous(4);
                                         if ($now->greaterThan($lastThursday)) {
-                                            // Next month's last Thursday
                                             $lastThursday = $now->copy()->addMonth()->endOfMonth()->previous(4);
                                         }
                                         $expiry = $lastThursday->format('d-m-Y');
@@ -65,7 +63,6 @@ class OptionContractForm
                                         $expiry = $expiryDate->format('d-m-Y');
                                         $isWeekly = 1;
                                     } elseif (str_contains($name, 'natural gas')) {
-                                        // Natural Gas expiry: 26th of current month, or next month if today > 26th
                                         $now = \Carbon\Carbon::now();
                                         $expiryDate = $now->copy()->day(26);
                                         if ($now->greaterThan($expiryDate)) {
@@ -73,7 +70,6 @@ class OptionContractForm
                                         }
                                         $expiry = $expiryDate->format('d-m-Y');
                                     } elseif (str_contains($name, 'crude oil')) {
-                                        // Crude Oil expiry: 19th of current month, or next month if today > 19th
                                         $now = \Carbon\Carbon::now();
                                         $expiryDate = $now->copy()->day(19);
                                         if ($now->greaterThan($expiryDate)) {
@@ -88,8 +84,9 @@ class OptionContractForm
                                         $set('is_weekly', $isWeekly);
                                     }
                                     $set('lot_size', $symbol->lot_size);
-                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
-                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    // Format expiry for contract code: DDMMMYY (e.g., 26Jan01)
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('dMy') : '{EXPIRY}';
+                                    $contractCode = $baseCode . $expiryForCode . ($strike ?: '{STRIKE}') . ($optionType ?: '{OPTION_TYPE}');
                                     $set('contract_code', $contractCode);
                                 }
                             }),
@@ -110,8 +107,8 @@ class OptionContractForm
                                     $strike = $state;
                                     $optionType = $get('option_type');
                                     $expiry = $get('expiry_date');
-                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
-                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('dMy') : '{EXPIRY}';
+                                    $contractCode = $baseCode . $expiryForCode . ($strike ?: '{STRIKE}') . ($optionType ?: '{OPTION_TYPE}');
                                     $set('contract_code', $contractCode);
                                 }
                             }),
@@ -128,8 +125,8 @@ class OptionContractForm
                                     $strike = $get('strike_price');
                                     $optionType = $state;
                                     $expiry = $get('expiry_date');
-                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('d-m-Y') : '{EXPIRY}';
-                                    $contractCode = $baseCode . '/' . $expiryForCode . '/' . ($strike ?: '{STRIKE}') . '/' . ($optionType ?: '{OPTION_TYPE}');
+                                    $expiryForCode = $expiry ? Carbon::parse($expiry)->format('dMy') : '{EXPIRY}';
+                                    $contractCode = $baseCode . $expiryForCode . ($strike ?: '{STRIKE}') . ($optionType ?: '{OPTION_TYPE}');
                                     $set('contract_code', $contractCode);
                                 }
                             }),

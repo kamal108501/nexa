@@ -119,7 +119,7 @@ class StockTipForm
                         TextInput::make('buy_price')
                             ->numeric()
                             ->required()
-                            ->reactive()
+                            ->debounce(500)
                             ->afterStateUpdated(
                                 fn($state, callable $set, callable $get) =>
                                 self::updateExpectedReturn($set, $get)
@@ -132,7 +132,7 @@ class StockTipForm
                         TextInput::make('target_price')
                             ->numeric()
                             ->required()
-                            ->reactive()
+                            ->debounce(500)
                             ->afterStateUpdated(
                                 fn($state, callable $set, callable $get) =>
                                 self::updateExpectedReturn($set, $get)

@@ -25,13 +25,13 @@ class StockTipsTable
                     ->date()
                     ->sortable(),
                 TextColumn::make('buy_price')
-                    ->money('INR')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('stop_loss')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('target_price')
-                    ->money('INR')
+                    ->numeric()
                     ->sortable(),
                 TextColumn::make('holding_days')
                     ->numeric()
@@ -68,7 +68,7 @@ class StockTipsTable
                 //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
+                // TrashedFilter::make(),
             ])
             ->recordActions([
                 // ViewAction::make(),
