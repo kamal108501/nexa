@@ -10,20 +10,22 @@ class DailyTradeResult extends Model
 {
     use SoftDeletes;
 
+    protected $table = 'daily_trade_results';
+
     protected $fillable = [
         'daily_trade_plan_id',
-        'exit_price',
+        'trade_date',
+        'entry_time',
         'exit_time',
+        'entry_price',
+        'exit_price',
+        'points',
         'pnl_amount',
         'pnl_percent',
         'result',
         'created_by',
         'updated_by',
         'deleted_by',
-    ];
-
-    protected $casts = [
-        'exit_time' => 'datetime',
     ];
 
     public function tradePlan(): BelongsTo

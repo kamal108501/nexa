@@ -9,6 +9,7 @@ class TradesPerStockChart extends ChartWidget
 {
     protected ?string $heading = 'Trades Per Stock';
     protected static ?int $sort = 1;
+    protected static bool $isDiscovered = false;
 
     protected function getData(): array
     {

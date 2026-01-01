@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -51,5 +54,37 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function monthlyRiskPlans(): HasMany
+    {
+        return $this->hasMany(TradingMonthlyRiskPlan::class);
+    }
+
+    public function monthlyRiskStats(): HasMany
+    {
+        return $this->hasMany(TradingMonthlyRiskStat::class);
+    }
+
+    /**
+     * Current month active risk plan
+     */
+    public function currentRiskPlan(): HasOne
+    {
+        return $this->hasOne(TradingMonthlyRiskPlan::class)
+            ->where('risk_year', now()->year)
+            ->where('risk_month', now()->month)
+            ->where('is_active', true);
+    }
+
+    /**
+     * Current month risk stats
+     */
+    public function currentRiskStats(): HasOne
+    {
+        return $this->hasOne(TradingMonthlyRiskStat::class)
+            ->where('risk_year', now()->year)
+            ->where('risk_month', now()->month)
+            ->where('is_active', true);
     }
 }

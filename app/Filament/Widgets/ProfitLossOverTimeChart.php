@@ -11,6 +11,7 @@ class ProfitLossOverTimeChart extends ChartWidget
     protected ?string $heading = 'Profit / Loss Over Time';
 
     protected static ?int $sort = 2;
+    protected static bool $isDiscovered = false;
 
     protected function getData(): array
     {
