@@ -61,6 +61,8 @@ class StockTradeExecutionForm
                             ->searchable()
                             ->preload()
                             ->required()
+                            ->live()
+                            ->afterStateUpdated(fn(callable $set) => $set('stock_tip_id', null))
                             ->createOptionAction(
                                 fn(Action $action) =>
                                 $action->modalHeading('Add Stock')->modalWidth('sm')
@@ -84,22 +86,28 @@ class StockTradeExecutionForm
                                 ])->id
                             ),
                         Select::make('stock_tip_id')
-                            ->relationship(
-                                name: 'stockTip',
-                                titleAttribute: 'tip_date', // Show tip_date as label
-                                modifyQueryUsing: fn(Builder $query) => $query->orderByDesc('tip_date')
-                            )
-                            ->getOptionLabelFromRecordUsing(function ($record) {
-                                // Show a more descriptive label for the stock tip
-                                if (!$record) return '';
-                                $symbol = $record->symbol->name ?? '';
-                                $date = $record->tip_date ? $record->tip_date->format('Y-m-d') : '';
-                                $buy = $record->buy_price ?? '';
-                                return "$symbol | $date | Buy: ₹$buy";
+                            ->label('Stock Tip')
+                            ->options(function (callable $get) {
+                                $symbolId = $get('symbol_id');
+                                if (!$symbolId) {
+                                    return [];
+                                }
+                                return \App\Models\StockTip::query()
+                                    ->where('symbol_id', $symbolId)
+                                    ->orderByDesc('tip_date')
+                                    ->get()
+                                    ->mapWithKeys(function ($tip) {
+                                        $symbol = $tip->symbol->name ?? '';
+                                        $date = $tip->tip_date ? $tip->tip_date->format('Y-m-d') : '';
+                                        $buy = $tip->buy_price ?? '';
+                                        $label = "$symbol | $date | Buy: ₹$buy";
+                                        return [$tip->id => $label];
+                                    })
+                                    ->toArray();
                             })
                             ->searchable()
-                            ->preload()
-                            ->label('Stock Tip')
+                            ->live()
+                            ->disabled(fn(callable $get) => !$get('symbol_id'))
                             ->createOptionAction(
                                 fn(Action $action) =>
                                 $action->modalHeading('Add Stock Tip')->modalWidth('4xl')
@@ -110,14 +118,13 @@ class StockTradeExecutionForm
                                     'md' => 3,
                                 ])->schema([
                                     Select::make('symbol_id')
-                                        ->relationship(
-                                            name: 'symbol',
-                                            titleAttribute: 'name',
-                                            modifyQueryUsing: fn(Builder $query) =>
-                                            $query->where('segment', 'STOCK')->where('is_active', 1)
+                                        ->label('Symbol')
+                                        ->options(
+                                            TradingSymbol::where('segment', 'STOCK')
+                                                ->where('is_active', 1)
+                                                ->pluck('name', 'id')
                                         )
                                         ->searchable()
-                                        ->preload()
                                         ->required(),
                                     DatePicker::make('tip_date')
                                         ->required()
