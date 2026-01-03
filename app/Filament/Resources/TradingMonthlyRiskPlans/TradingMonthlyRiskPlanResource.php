@@ -5,7 +5,6 @@ namespace App\Filament\Resources\TradingMonthlyRiskPlans;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Pages\CreateTradingMonthlyRiskPlan;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Pages\EditTradingMonthlyRiskPlan;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Pages\ListTradingMonthlyRiskPlans;
-use App\Filament\Resources\TradingMonthlyRiskPlans\Pages\ViewTradingMonthlyRiskPlan;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Schemas\TradingMonthlyRiskPlanForm;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Schemas\TradingMonthlyRiskPlanInfolist;
 use App\Filament\Resources\TradingMonthlyRiskPlans\Tables\TradingMonthlyRiskPlansTable;
@@ -27,6 +26,9 @@ class TradingMonthlyRiskPlanResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Trading Masters';
     protected static ?string $navigationLabel = 'Monthly Risk Plans';
     protected static ?int $navigationSort = 2;
+
+    protected static ?string $modelLabel = 'Monthly Risk Plan';
+    protected static ?string $pluralModelLabel = 'Monthly Risk Plans';
 
     protected static ?string $recordTitleAttribute = 'admin';
 
@@ -57,7 +59,6 @@ class TradingMonthlyRiskPlanResource extends Resource
         return [
             'index' => ListTradingMonthlyRiskPlans::route('/'),
             'create' => CreateTradingMonthlyRiskPlan::route('/create'),
-            'view' => ViewTradingMonthlyRiskPlan::route('/{record}'),
             'edit' => EditTradingMonthlyRiskPlan::route('/{record}/edit'),
         ];
     }

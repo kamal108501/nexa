@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\DailyTradeResults\Schemas;
 
 use App\Models\DailyTradePlan;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,88 +18,95 @@ class DailyTradeResultForm
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema->schema([
+        return $schema->components([
 
-            /* ===============================
-             | System fields
-             |===============================*/
             Hidden::make('created_by')
                 ->default(fn() => Auth::id())
                 ->required(),
 
-            /* ===============================
-             | Trade selection
-             |===============================*/
-            Select::make('daily_trade_plan_id')
-                ->label('Option Contract')
-                ->relationship('tradePlan.optionContract', 'contract_code')
-                ->searchable()
-                ->required(),
+            Section::make('Trade Result')
+                ->columnSpanFull()
+                ->schema([
+                    Grid::make([
+                        'default' => 1,
+                        'md' => 3,
+                    ])->schema([
 
-            /* ===============================
-             | Date & time
-             |===============================*/
-            DatePicker::make('trade_date')
-                ->required()
-                ->default(now())
-                ->dehydrated(true),
+                        // Trade selection
+                        Select::make('daily_trade_plan_id')
+                            ->label('Option Contract (from plans)')
+                            ->options(function () {
+                                return \App\Models\DailyTradePlan::query()
+                                    ->with('optionContract')
+                                    ->whereHas('optionContract')
+                                    ->get()
+                                    ->mapWithKeys(fn($plan) => [
+                                        $plan->id => $plan->optionContract?->contract_code,
+                                    ])->filter();
+                            })
+                            ->searchable()
+                            ->required(),
 
-            DateTimePicker::make('entry_time')
-                ->default(now()),
+                        // Dates & times
+                        DatePicker::make('trade_date')
+                            ->required()
+                            ->default(now())
+                            ->dehydrated(true),
 
-            DateTimePicker::make('exit_time')
-                ->default(now()),
+                        DateTimePicker::make('entry_time')
+                            ->timezone('Asia/Kolkata')
+                            ->dehydrateStateUsing(fn($state) => $state ? Carbon::parse($state, 'Asia/Kolkata')->setTimezone('UTC') : null)
+                            ->default(now()),
 
-            /* ===============================
-             | Prices
-             |===============================*/
-            TextInput::make('entry_price')
-                ->required()
-                ->numeric()
-                ->reactive()
-                ->afterStateUpdated(
-                    fn($state, $set, $get) =>
-                    self::recalculatePnL($set, $get)
-                ),
+                        DateTimePicker::make('exit_time')
+                            ->timezone('Asia/Kolkata')
+                            ->dehydrateStateUsing(fn($state) => $state ? Carbon::parse($state, 'Asia/Kolkata')->setTimezone('UTC') : null)
+                            ->default(now()->addMinutes(15)),
 
-            TextInput::make('exit_price')
-                ->required()
-                ->numeric()
-                ->reactive()
-                ->afterStateUpdated(
-                    fn($state, $set, $get) =>
-                    self::recalculatePnL($set, $get)
-                ),
+                        // Prices
+                        TextInput::make('entry_price')
+                            ->required()
+                            ->numeric()
+                            ->lazy()
+                            ->afterStateUpdated(
+                                fn($state, $set, $get) => self::recalculatePnL($set, $get)
+                            ),
 
-            /* ===============================
-             | Auto-calculated fields
-             |===============================*/
-            TextInput::make('points')
-                ->disabled()
-                ->dehydrated(true)
-                ->placeholder('Auto'),
+                        TextInput::make('exit_price')
+                            ->required()
+                            ->numeric()
+                            ->lazy()
+                            ->afterStateUpdated(
+                                fn($state, $set, $get) => self::recalculatePnL($set, $get)
+                            ),
 
-            TextInput::make('pnl_amount')
-                ->disabled()
-                ->dehydrated(true)
-                ->placeholder('Auto'),
+                        // Auto-calculated fields
+                        TextInput::make('points')
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->placeholder('Auto'),
 
-            TextInput::make('pnl_percent')
-                ->disabled()
-                ->dehydrated(true)
-                ->placeholder('Auto'),
+                        TextInput::make('pnl_amount')
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->placeholder('Auto'),
 
-            /* ===============================
-             | Result (auto)
-             |===============================*/
-            Select::make('result')
-                ->options([
-                    'profit' => 'Profit',
-                    'loss'   => 'Loss',
-                ])
-                ->disabled()
-                ->dehydrated(true)
-                ->required(),
+                        TextInput::make('pnl_percent')
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->placeholder('Auto'),
+
+                        // Result (auto)
+                        Select::make('result')
+                            ->options([
+                                'profit' => 'Profit',
+                                'loss'   => 'Loss',
+                            ])
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->required(),
+                    ]),
+                ]),
         ]);
     }
 
