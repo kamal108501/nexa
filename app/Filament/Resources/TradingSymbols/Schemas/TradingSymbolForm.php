@@ -36,7 +36,7 @@ class TradingSymbolForm
                             ->label('Segment')
                             ->options([
                                 'INDEX' => 'INDEX',
-                                'EQUITY' => 'STOCK',
+                                'STOCK' => 'STOCK',
                                 'COMMODITY' => 'COMMODITY',
                                 'CURRENCY' => 'CURRENCY',
                             ])
