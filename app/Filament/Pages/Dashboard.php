@@ -8,17 +8,24 @@ use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
 {
+    protected static bool $shouldRegisterNavigation = true;
+    protected static ?string $navigationLabel = 'Trading Dashboard';
+
     protected function getHeaderWidgets(): array
     {
         return [
-            MonthlyRiskSummary::class,
             MonthlyRiskMeter::class,
+            MonthlyRiskSummary::class,
         ];
     }
 
     public function getHeaderWidgetsColumns(): array|int
     {
-        return 2; // 2-column grid for header widgets
+        return [
+            'default' => 2,
+            'lg' => 3,
+            '2xl' => 4,
+        ];
     }
 
     public function getWidgets(): array

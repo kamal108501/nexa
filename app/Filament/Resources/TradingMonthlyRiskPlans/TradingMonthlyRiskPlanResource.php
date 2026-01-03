@@ -24,6 +24,9 @@ class TradingMonthlyRiskPlanResource extends Resource
     protected static ?string $model = TradingMonthlyRiskPlan::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Trading Masters';
+    protected static ?string $navigationLabel = 'Monthly Risk Plans';
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'admin';
 

@@ -23,9 +23,10 @@ class OptionContractResource extends Resource
     protected static ?string $model = OptionContract::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static string|\UnitEnum|null $navigationGroup = 'Trading';
+    protected static string|\UnitEnum|null $navigationGroup = 'Options Trading';
+    protected static ?string $navigationLabel = 'Option Contracts';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

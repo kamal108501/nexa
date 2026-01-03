@@ -24,7 +24,8 @@ class TradingSymbolResource extends Resource
 
     // Use a relevant Filament Heroicon for trading symbols, e.g. 'heroicon-o-chart-bar'
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
-    protected static string|\UnitEnum|null $navigationGroup = 'Trading';
+    protected static string|\UnitEnum|null $navigationGroup = 'Trading Masters';
+    protected static ?string $navigationLabel = 'Trading Symbols';
 
     protected static ?int $navigationSort = 1;
 
