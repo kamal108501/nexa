@@ -92,7 +92,8 @@ class OptionContractForm
                             }),
                         DatePicker::make('expiry_date')
                             ->required()
-                            ->default(now()),
+                            ->default(now())
+                            ->minDate(now()),
                         TextInput::make('strike_price')
                             ->required()
                             ->numeric()

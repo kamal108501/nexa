@@ -13,17 +13,38 @@ return new class extends Migration
     {
         Schema::create('daily_trend_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('symbol_id')->index('daily_trend_logs_symbol_id_foreign');
+
+            // Instrument
+            $table->foreignId('trading_symbol_id')
+                ->constrained('trading_symbols')
+                ->cascadeOnDelete();
+
+            // Trend info
             $table->date('trend_date');
-            $table->enum('predicted_trend', ['bullish', 'bearish', 'sideways']);
-            $table->enum('actual_trend', ['bullish', 'bearish', 'sideways'])->nullable();
+
+            $table->enum('predicted_trend', ['BULLISH', 'BEARISH', 'SIDEWAYS']);
+            $table->enum('actual_trend', ['BULLISH', 'BEARISH', 'SIDEWAYS'])->nullable();
+
             $table->boolean('is_prediction_correct')->nullable();
             $table->text('notes')->nullable();
+
+            $table->boolean('is_active')->default(true);
+
+            // ===== Audit fields =====
             $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('created_at')->nullable();
+
             $table->unsignedBigInteger('updated_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+
             $table->unsignedBigInteger('deleted_by')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamp('deleted_at')->nullable();
+
+            // ===== Indexes =====
+            $table->index(
+                ['trading_symbol_id', 'trend_date', 'is_active', 'deleted_at'],
+                'idx_trend_symbol_date'
+            );
         });
     }
 

@@ -51,22 +51,6 @@ class TradingSymbolSeeder extends Seeder
                 'lot_size'    => 1250,
                 'tick_size'   => 0.05,
             ],
-            [
-                'symbol_code' => 'RELIANCE',
-                'name'        => 'Reliance Industries Ltd',
-                'segment'     => 'STOCK',
-                'exchange'    => 'NSE',
-                'lot_size'    => 1,
-                'tick_size'   => 0.05,
-            ],
-            [
-                'symbol_code' => 'TCS',
-                'name'        => 'Tata Consultancy Services',
-                'segment'     => 'STOCK',
-                'exchange'    => 'NSE',
-                'lot_size'    => 1,
-                'tick_size'   => 0.05,
-            ],
         ];
 
         foreach ($symbols as $symbol) {

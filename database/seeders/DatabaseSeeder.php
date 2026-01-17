@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create admin user
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@test.com',
+            'password' => bcrypt('password'),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Call other seeders
+        $this->call([
+            TradingSymbolSeeder::class,
         ]);
     }
 }

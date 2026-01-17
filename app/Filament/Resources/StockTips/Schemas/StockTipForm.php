@@ -42,6 +42,18 @@ class StockTipForm
         }
     }
 
+    protected static function updateStopLoss(callable $set, callable $get): void
+    {
+        $buy = (float) $get('buy_price');
+
+        if ($buy > 0) {
+            $stopLoss = $buy - ($buy * 0.10);
+            $set('stop_loss', round($stopLoss, 2));
+        } else {
+            $set('stop_loss', null);
+        }
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
@@ -119,20 +131,21 @@ class StockTipForm
                         TextInput::make('buy_price')
                             ->numeric()
                             ->required()
-                            ->debounce(500)
-                            ->afterStateUpdated(
-                                fn($state, callable $set, callable $get) =>
-                                self::updateExpectedReturn($set, $get)
-                            ),
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                self::updateStopLoss($set, $get);
+                                self::updateExpectedReturn($set, $get);
+                            }),
 
                         TextInput::make('stop_loss')
+                            ->label('Stop Loss (-10% from Buy Price)')
                             ->numeric()
                             ->required(),
 
                         TextInput::make('target_price')
                             ->numeric()
                             ->required()
-                            ->debounce(500)
+                            ->live(onBlur: true)
                             ->afterStateUpdated(
                                 fn($state, callable $set, callable $get) =>
                                 self::updateExpectedReturn($set, $get)

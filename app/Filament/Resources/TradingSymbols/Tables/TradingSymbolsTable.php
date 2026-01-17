@@ -21,10 +21,10 @@ class TradingSymbolsTable
     {
         return $table
             ->columns([
-                TextColumn::make('symbol_code')->label('Symbol Code')->searchable(),
-                TextColumn::make('name')->label('Name')->searchable(),
+                TextColumn::make('symbol_code')->label('Symbol Code')->searchable()->sortable(),
+                TextColumn::make('name')->label('Name')->searchable()->sortable(),
                 TextColumn::make('exchange')->label('Exchange')->sortable(),
-                TextColumn::make('segment')->label('Segment')->badge(),
+                TextColumn::make('segment')->label('Segment')->badge()->sortable(),
                 TextColumn::make('lot_size')->label('Lot Size')->numeric()->sortable(),
                 TextColumn::make('tick_size')->label('Tick Size')->numeric()->sortable(),
                 ToggleColumn::make('is_active')->label('Active')->alignCenter(),
@@ -35,6 +35,7 @@ class TradingSymbolsTable
                 // TextColumn::make('updated_at')->label('Updated At')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 // TextColumn::make('deleted_at')->label('Deleted At')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('symbol_code', 'asc')
             ->filters([
                 // TrashedFilter::make(),
             ])

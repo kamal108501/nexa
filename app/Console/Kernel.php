@@ -23,6 +23,11 @@ class Kernel extends ConsoleKernel
         })
             ->monthlyOn(1, '00:05')     // 1st day of month at 12:05 AM
             ->withoutOverlapping();
+
+        // Delete expired option contracts daily at 1:00 AM
+        $schedule->command('options:delete-expired')
+            ->dailyAt('01:00')
+            ->withoutOverlapping();
     }
 
     /**

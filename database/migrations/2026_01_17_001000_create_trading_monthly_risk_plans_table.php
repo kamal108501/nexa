@@ -11,13 +11,14 @@ return new class extends Migration
         Schema::create('trading_monthly_risk_plans', function (Blueprint $table) {
             $table->id();
 
+            // User
             $table->foreignId('user_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
             // Month definition
-            $table->year('risk_year');            // 2025
-            $table->tinyInteger('risk_month');     // 1 = Jan, 2 = Feb
+            $table->year('risk_year');                  // 2025
+            $table->unsignedTinyInteger('risk_month');  // 1–12
 
             // Risk rules
             $table->decimal('base_max_loss', 10, 2);
@@ -26,16 +27,29 @@ return new class extends Migration
             $table->boolean('carry_profit_to_next_month')->default(true);
             $table->boolean('is_locked')->default(false);
 
-            // Default columns
+            // Status
             $table->boolean('is_active')->default(true);
+
+            // ===== Audit fields =====
             $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('created_at')->nullable();
+
             $table->unsignedBigInteger('updated_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+
             $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
 
-            $table->timestamps();
-            $table->softDeletes();
+            // ===== Constraints & Indexes =====
+            $table->unique(
+                ['user_id', 'risk_year', 'risk_month'],
+                'uniq_user_month_risk'
+            );
 
-            $table->unique(['user_id', 'risk_year', 'risk_month'], 'uniq_user_month_risk');
+            $table->index(
+                ['user_id', 'is_active', 'deleted_at'],
+                'idx_user_active_risk'
+            );
         });
     }
 

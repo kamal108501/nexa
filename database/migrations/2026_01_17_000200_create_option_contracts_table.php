@@ -13,23 +13,43 @@ return new class extends Migration
     {
         Schema::create('option_contracts', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('symbol_id');
+
+            // Instrument
+            $table->foreignId('trading_symbol_id')
+                ->constrained('trading_symbols')
+                ->cascadeOnDelete();
+
+            // Contract details
             $table->date('expiry_date');
-            $table->decimal('strike_price', 10);
+            $table->decimal('strike_price', 10, 2);
             $table->enum('option_type', ['CE', 'PE']);
             $table->string('contract_code')->default('');
+
+            // Trading properties
             $table->integer('lot_size');
-            $table->decimal('tick_size', 6)->default(0.05);
+            $table->decimal('tick_size', 8, 4)->default(0.05);
             $table->boolean('is_weekly')->default(true);
             $table->boolean('is_active')->default(true);
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->unsignedBigInteger('deleted_by')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
 
-            $table->index(['symbol_id', 'expiry_date']);
-            $table->unique(['symbol_id', 'expiry_date', 'strike_price', 'option_type'], 'unique_option_contract');
+            // ===== Audit fields =====
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('created_at')->nullable();
+
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+
+            // ===== Indexes =====
+            $table->index(['expiry_date', 'is_active'], 'idx_expiry_active');
+            $table->index('deleted_at');
+
+            // ===== Constraints =====
+            $table->unique(
+                ['trading_symbol_id', 'expiry_date', 'strike_price', 'option_type'],
+                'uniq_option_contract'
+            );
         });
     }
 
