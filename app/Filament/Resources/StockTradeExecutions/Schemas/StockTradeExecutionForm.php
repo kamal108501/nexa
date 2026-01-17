@@ -52,6 +52,18 @@ class StockTradeExecutionForm
         return $dt;
     }
     // Add helper methods for expiry and expected return, copied from StockTipForm
+    protected static function updateStopLoss(callable $set, callable $get): void
+    {
+        $buy = (float) $get('buy_price');
+
+        if ($buy > 0) {
+            $stopLoss = $buy - ($buy * 0.10);
+            $set('stop_loss', round($stopLoss, 2));
+        } else {
+            $set('stop_loss', null);
+        }
+    }
+
     protected static function updateExpiryDate(callable $set, callable $get): void
     {
         $tipDate = $get('tip_date');
@@ -145,6 +157,15 @@ class StockTradeExecutionForm
                             ->searchable()
                             ->live()
                             ->disabled(fn(callable $get) => ! $get('trading_symbol_id'))
+                            ->afterStateUpdated(function (callable $set, callable $get) {
+                                $tipId = $get('stock_tip_id');
+                                if ($tipId) {
+                                    $tip = \App\Models\StockTip::find($tipId);
+                                    if ($tip) {
+                                        $set('price', $tip->buy_price);
+                                    }
+                                }
+                            })
                             ->createOptionAction(
                                 fn(Action $action) =>
                                 $action->modalHeading('Add Stock Tip')->modalWidth('4xl')
@@ -162,7 +183,20 @@ class StockTradeExecutionForm
                                                 ->pluck('name', 'id')
                                         )
                                         ->searchable()
-                                        ->required(),
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(function (callable $set, callable $get) {
+                                            $symbolId = $get('trading_symbol_id');
+                                            if ($symbolId) {
+                                                $latestPrice = \App\Models\StockDailyPrice::where('trading_symbol_id', $symbolId)
+                                                    ->orderByDesc('price_date')
+                                                    ->first();
+                                                if ($latestPrice) {
+                                                    $set('buy_price', $latestPrice->close_price);
+                                                    $set('target_price', $latestPrice->close_price);
+                                                }
+                                            }
+                                        }),
                                     DatePicker::make('tip_date')
                                         ->required()
                                         ->default(now())
@@ -174,18 +208,19 @@ class StockTradeExecutionForm
                                     TextInput::make('buy_price')
                                         ->numeric()
                                         ->required()
-                                        ->reactive()
-                                        ->afterStateUpdated(
-                                            fn($state, callable $set, callable $get) =>
-                                            self::updateExpectedReturn($set, $get)
-                                        ),
+                                        ->live(onBlur: true)
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                            self::updateStopLoss($set, $get);
+                                            self::updateExpectedReturn($set, $get);
+                                        }),
                                     TextInput::make('stop_loss')
+                                        ->label('Stop Loss (-10% from Buy Price)')
                                         ->numeric()
                                         ->required(),
                                     TextInput::make('target_price')
                                         ->numeric()
                                         ->required()
-                                        ->reactive()
+                                        ->live(onBlur: true)
                                         ->afterStateUpdated(
                                             fn($state, callable $set, callable $get) =>
                                             self::updateExpectedReturn($set, $get)
