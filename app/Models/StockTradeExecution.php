@@ -13,11 +13,11 @@ class StockTradeExecution extends Model
 
     protected $fillable = [
         'stock_tip_id',
-        'symbol_id',
+        'trading_symbol_id',
         'execution_type',
         'quantity',
         'price',
-        'execution_date',
+        'execution_at',
         'execution_notes',
         'is_active',
         'created_by',
@@ -26,13 +26,13 @@ class StockTradeExecution extends Model
     ];
 
     protected $casts = [
-        'execution_date' => 'date',
+        'execution_at' => 'datetime',
         'is_active' => 'boolean',
     ];
 
     public function symbol()
     {
-        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
+        return $this->belongsTo(TradingSymbol::class, 'trading_symbol_id');
     }
 
     public function stockTip()

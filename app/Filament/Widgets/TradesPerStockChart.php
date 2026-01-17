@@ -14,8 +14,8 @@ class TradesPerStockChart extends ChartWidget
     protected function getData(): array
     {
         $trades = StockTradeExecution::with('symbol')
-            ->selectRaw('symbol_id, COUNT(*) as count')
-            ->groupBy('symbol_id')
+            ->selectRaw('trading_symbol_id, COUNT(*) as count')
+            ->groupBy('trading_symbol_id')
             ->get();
 
         $labels = $trades->map(fn($trade) => $trade->symbol->name ?? 'Unknown')->toArray();

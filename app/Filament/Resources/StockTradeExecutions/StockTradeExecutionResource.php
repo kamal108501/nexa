@@ -5,9 +5,7 @@ namespace App\Filament\Resources\StockTradeExecutions;
 use App\Filament\Resources\StockTradeExecutions\Pages\CreateStockTradeExecution;
 use App\Filament\Resources\StockTradeExecutions\Pages\EditStockTradeExecution;
 use App\Filament\Resources\StockTradeExecutions\Pages\ListStockTradeExecutions;
-use App\Filament\Resources\StockTradeExecutions\Pages\ViewStockTradeExecution;
 use App\Filament\Resources\StockTradeExecutions\Schemas\StockTradeExecutionForm;
-use App\Filament\Resources\StockTradeExecutions\Schemas\StockTradeExecutionInfolist;
 use App\Filament\Resources\StockTradeExecutions\Tables\StockTradeExecutionsTable;
 use App\Models\StockTradeExecution;
 use BackedEnum;
@@ -33,11 +31,6 @@ class StockTradeExecutionResource extends Resource
         return StockTradeExecutionForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return StockTradeExecutionInfolist::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return StockTradeExecutionsTable::configure($table);
@@ -55,7 +48,6 @@ class StockTradeExecutionResource extends Resource
         return [
             'index' => ListStockTradeExecutions::route('/'),
             'create' => CreateStockTradeExecution::route('/create'),
-            'view' => ViewStockTradeExecution::route('/{record}'),
             'edit' => EditStockTradeExecution::route('/{record}/edit'),
         ];
     }

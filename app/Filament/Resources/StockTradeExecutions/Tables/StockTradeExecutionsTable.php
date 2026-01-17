@@ -37,7 +37,7 @@ class StockTradeExecutionsTable
 
                 TextColumn::make('execution_type')
                     ->badge()
-                    ->color(fn($state) => $state === 'buy' ? 'success' : 'danger'),
+                    ->color(fn($state) => $state === 'BUY' ? 'success' : 'danger'),
 
                 TextColumn::make('quantity')
                     ->numeric()
@@ -47,8 +47,8 @@ class StockTradeExecutionsTable
                     ->numeric()
                     ->sortable(),
 
-                TextColumn::make('execution_date')
-                    ->date()
+                TextColumn::make('execution_at')
+                    ->dateTime()
                     ->sortable(),
 
                 // IconColumn::make('is_active')
@@ -59,12 +59,12 @@ class StockTradeExecutionsTable
                         if ($record->execution_type !== 'sell') {
                             return '-';
                         }
-                        // Get all previous buy trades for this symbol, ordered by execution_date (FIFO)
+                        // Get all previous buy trades for this symbol, ordered by execution_at (FIFO)
                         $buys = $record->newQuery()
-                            ->where('symbol_id', $record->symbol_id)
-                            ->where('execution_type', 'buy')
-                            ->where('execution_date', '<=', $record->execution_date)
-                            ->orderBy('execution_date', 'asc')
+                            ->where('trading_symbol_id', $record->trading_symbol_id)
+                            ->where('execution_type', 'BUY')
+                            ->where('execution_at', '<=', $record->execution_at)
+                            ->orderBy('execution_at', 'asc')
                             ->get();
                         $sellQty = $record->quantity;
                         $matchedQty = 0;
@@ -124,7 +124,7 @@ class StockTradeExecutionsTable
                             $buyQuery  = clone $query;
                             $sellQuery = clone $query;
 
-                            $buyQty = $buyQuery->where('execution_type', 'buy')->sum('quantity');
+                            $buyQty = $buyQuery->where('execution_type', 'BUY')->sum('quantity');
                             if ($buyQty == 0) {
                                 return 0;
                             }
@@ -135,7 +135,7 @@ class StockTradeExecutionsTable
 
                             $avgBuy = $buyAmt / $buyQty;
 
-                            $sellQty = $sellQuery->where('execution_type', 'sell')->sum('quantity');
+                            $sellQty = $sellQuery->where('execution_type', 'SELL')->sum('quantity');
                             $sellAmt = $sellQuery
                                 ->get()
                                 ->sum(fn($e) => $e->quantity * $e->price);
@@ -155,7 +155,7 @@ class StockTradeExecutionsTable
                             $buyQuery  = clone $query;
                             $sellQuery = clone $query;
 
-                            $buyQty = $buyQuery->where('execution_type', 'buy')->sum('quantity');
+                            $buyQty = $buyQuery->where('execution_type', 'BUY')->sum('quantity');
                             if ($buyQty == 0) {
                                 return 0;
                             }
@@ -166,7 +166,7 @@ class StockTradeExecutionsTable
 
                             $avgBuy = $buyAmt / $buyQty;
 
-                            $sellQty = $sellQuery->where('execution_type', 'sell')->sum('quantity');
+                            $sellQty = $sellQuery->where('execution_type', 'SELL')->sum('quantity');
                             $sellAmt = $sellQuery
                                 ->get()
                                 ->sum(fn($e) => $e->quantity * $e->price);

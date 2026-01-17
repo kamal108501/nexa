@@ -13,7 +13,7 @@ class DailyTradePlan extends Model
 
     protected $fillable = [
         'trade_date',
-        'symbol_id',
+        'trading_symbol_id',
         'option_contract_id',
         'current_price',
         'planned_entry_price',
@@ -36,7 +36,7 @@ class DailyTradePlan extends Model
 
     public function symbol(): BelongsTo
     {
-        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
+        return $this->belongsTo(TradingSymbol::class, 'trading_symbol_id');
     }
 
     public function optionContract(): BelongsTo

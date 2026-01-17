@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateStockTradeExecution extends CreateRecord
 {
     protected static string $resource = StockTradeExecutionResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

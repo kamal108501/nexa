@@ -14,6 +14,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+
+        $schedule->command('stocks:fetch-daily-prices')
+            ->weekdays()
+            ->timezone('Asia/Kolkata')
+            ->at('17:00');
+
         // Auto-create next month trading risk plan
         $schedule->call(function () {
             User::where('is_active', true)->each(function ($user) {

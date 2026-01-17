@@ -70,7 +70,7 @@ class StockTipForm
                         // --------------------
                         // Stock (only STOCK segment)
                         // --------------------
-                        Select::make('symbol_id')
+                        Select::make('trading_symbol_id')
                             ->relationship(
                                 name: 'symbol',
                                 titleAttribute: 'name',
@@ -119,7 +119,8 @@ class StockTipForm
                         TextInput::make('holding_days')
                             ->numeric()
                             ->required()
-                            ->placeholder('e.g., 30')->reactive()
+                            ->placeholder('e.g., 30')
+                            ->live(onBlur: true)
                             ->afterStateUpdated(
                                 fn($state, callable $set, callable $get) =>
                                 self::updateExpiryDate($set, $get)

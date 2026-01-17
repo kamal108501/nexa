@@ -12,7 +12,7 @@ class OptionContract extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'symbol_id',
+        'trading_symbol_id',
         'expiry_date',
         'strike_price',
         'option_type',
@@ -33,7 +33,7 @@ class OptionContract extends Model
 
     public function symbol(): BelongsTo
     {
-        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
+        return $this->belongsTo(TradingSymbol::class, 'trading_symbol_id');
     }
 
     public function dailyTradePlans(): HasMany

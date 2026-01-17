@@ -12,7 +12,7 @@ class StockTip extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'symbol_id',
+        'trading_symbol_id',
         'tip_date',
         'buy_price',
         'stop_loss',
@@ -21,6 +21,9 @@ class StockTip extends Model
         'expiry_date',
         'expected_return_percent',
         'status',
+        'exit_price',
+        'exit_date',
+        'is_active',
         'notes',
         'created_by',
         'updated_by',
@@ -30,10 +33,12 @@ class StockTip extends Model
     protected $casts = [
         'tip_date' => 'date',
         'expiry_date' => 'date',
+        'exit_date' => 'date',
+        'is_active' => 'boolean',
     ];
 
     public function symbol(): BelongsTo
     {
-        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
+        return $this->belongsTo(TradingSymbol::class, 'trading_symbol_id');
     }
 }

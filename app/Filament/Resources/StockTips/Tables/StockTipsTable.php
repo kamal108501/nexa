@@ -20,31 +20,57 @@ class StockTipsTable
         return $table
             ->columns([
                 TextColumn::make('symbol.name')
-                    ->searchable(),
+                    ->label('Stock')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('tip_date')
+                    ->label('Tip Date')
                     ->date()
                     ->sortable(),
                 TextColumn::make('buy_price')
-                    ->numeric()
+                    ->label('Buy Price')
+                    ->money('INR')
                     ->sortable(),
                 TextColumn::make('stop_loss')
-                    ->numeric()
+                    ->label('Stop Loss')
+                    ->money('INR')
                     ->sortable(),
                 TextColumn::make('target_price')
-                    ->numeric()
+                    ->label('Target')
+                    ->money('INR')
                     ->sortable(),
                 TextColumn::make('holding_days')
+                    ->label('Hold Days')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('expiry_date')
+                    ->label('Expiry')
                     ->date()
                     ->sortable(),
                 TextColumn::make('expected_return_percent')
                     ->label('Expected Return (%)')
                     ->numeric()
+                    ->sortable()
+                    ->suffix('%'),
+                TextColumn::make('exit_price')
+                    ->label('Exit Price')
+                    ->money('INR')
+                    ->sortable(),
+                TextColumn::make('exit_date')
+                    ->label('Exit Date')
+                    ->date()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->badge(),
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'active' => 'info',
+                        'completed' => 'success',
+                        'sl_hit' => 'danger',
+                        'expired' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => ucfirst(str_replace('_', ' ', $state)))
+                    ->sortable(),
                 // TextColumn::make('created_by')
                 //     ->numeric()
                 //     ->sortable(),
@@ -72,8 +98,10 @@ class StockTipsTable
             ])
             ->recordActions([
                 // ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->disabled(fn($record) => $record->status !== 'active'),
+                DeleteAction::make()
+                    ->disabled(fn($record) => $record->status !== 'active'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -11,7 +11,7 @@ class DailyTrendLog extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'symbol_id',
+        'trading_symbol_id',
         'trend_date',
         'predicted_trend',
         'actual_trend',
@@ -29,6 +29,6 @@ class DailyTrendLog extends Model
 
     public function symbol(): BelongsTo
     {
-        return $this->belongsTo(TradingSymbol::class, 'symbol_id');
+        return $this->belongsTo(TradingSymbol::class, 'trading_symbol_id');
     }
 }

@@ -15,8 +15,8 @@ class ProfitLossOverTimeChart extends ChartWidget
 
     protected function getData(): array
     {
-        $trades = StockTradeExecution::selectRaw('DATE(execution_date) as date, SUM(CASE WHEN execution_type = "sell" THEN price * quantity ELSE 0 END) - SUM(CASE WHEN execution_type = "buy" THEN price * quantity ELSE 0 END) as pnl')
-            ->groupByRaw('DATE(execution_date)')
+        $trades = StockTradeExecution::selectRaw('DATE(execution_at) as date, SUM(CASE WHEN execution_type = "SELL" THEN price * quantity ELSE 0 END) - SUM(CASE WHEN execution_type = "BUY" THEN price * quantity ELSE 0 END) as pnl')
+            ->groupByRaw('DATE(execution_at)')
             ->orderBy('date')
             ->get();
 

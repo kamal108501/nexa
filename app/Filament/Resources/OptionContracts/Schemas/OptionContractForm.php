@@ -26,7 +26,7 @@ class OptionContractForm
                         'default' => 1,
                         'md' => 3,
                     ])->schema([
-                        Select::make('symbol_id')
+                        Select::make('trading_symbol_id')
                             ->relationship(
                                 name: 'symbol',
                                 titleAttribute: 'name',
@@ -100,7 +100,7 @@ class OptionContractForm
                             ->reactive()
                             ->debounce(500)
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $symbolId = $get('symbol_id');
+                                $symbolId = $get('trading_symbol_id');
                                 $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
                                 if ($symbol) {
                                     $name = strtolower($symbol->name);
@@ -118,7 +118,7 @@ class OptionContractForm
                             ->required()
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $symbolId = $get('symbol_id');
+                                $symbolId = $get('trading_symbol_id');
                                 $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
                                 if ($symbol) {
                                     $name = strtolower($symbol->name);

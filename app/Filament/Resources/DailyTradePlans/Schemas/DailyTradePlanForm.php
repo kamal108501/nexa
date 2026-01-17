@@ -33,7 +33,7 @@ class DailyTradePlanForm
                         DatePicker::make('trade_date')
                             ->required()
                             ->default(now()),
-                        Select::make('symbol_id')
+                        Select::make('trading_symbol_id')
                             ->relationship('symbol', 'name', function ($query) {
                                 $query->whereIn('segment', ['INDEX', 'COMMODITY']);
                             })
@@ -44,11 +44,11 @@ class DailyTradePlanForm
                         Select::make('option_contract_id')
                             ->label('Option Contract')
                             ->options(function ($get) {
-                                $symbolId = $get('symbol_id');
+                                $symbolId = $get('trading_symbol_id');
                                 if (!$symbolId) {
                                     return [];
                                 }
-                                return \App\Models\OptionContract::where('symbol_id', $symbolId)
+                                return \App\Models\OptionContract::where('trading_symbol_id', $symbolId)
                                     ->pluck('contract_code', 'id');
                             })
                             ->searchable()
@@ -61,7 +61,7 @@ class DailyTradePlanForm
 
                                 $contract = \App\Models\OptionContract::find($state);
                                 if ($contract) {
-                                    $set('symbol_id', $contract->symbol_id);
+                                    $set('trading_symbol_id', $contract->trading_symbol_id);
                                 }
                                 if ($contract && $contract->symbol) {
                                     $set('lot_size_display', $contract->symbol->lot_size);
@@ -74,7 +74,7 @@ class DailyTradePlanForm
                                     ->modalWidth('lg')
                             )
                             ->createOptionForm([
-                                Select::make('symbol_id')
+                                Select::make('trading_symbol_id')
                                     ->label('Symbol')
                                     ->options(fn() => \App\Models\TradingSymbol::whereIn('segment', ['INDEX', 'COMMODITY'])
                                         ->where('is_active', 1)
@@ -144,7 +144,7 @@ class DailyTradePlanForm
                                     ->reactive()
                                     ->debounce(500)
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $symbolId = $get('symbol_id');
+                                        $symbolId = $get('trading_symbol_id');
                                         $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
                                         if ($symbol) {
                                             $name = strtolower($symbol->name);
@@ -162,7 +162,7 @@ class DailyTradePlanForm
                                     ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $symbolId = $get('symbol_id');
+                                        $symbolId = $get('trading_symbol_id');
                                         $symbol = $symbolId ? \App\Models\TradingSymbol::find($symbolId) : null;
                                         if ($symbol) {
                                             $name = strtolower($symbol->name);
@@ -186,7 +186,7 @@ class DailyTradePlanForm
                             ])
                             ->createOptionUsing(function (array $data) {
                                 return OptionContract::create([
-                                    'symbol_id' => $data['symbol_id'],
+                                    'trading_symbol_id' => $data['trading_symbol_id'],
                                     'expiry_date' => $data['expiry_date'],
                                     'strike_price' => $data['strike_price'],
                                     'option_type' => $data['option_type'],
