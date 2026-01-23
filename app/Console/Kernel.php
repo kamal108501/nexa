@@ -16,24 +16,24 @@ class Kernel extends ConsoleKernel
     {
 
         $schedule->command('stocks:fetch-daily-prices')
-            ->dailyAt('17:00')
+            // ->dailyAt('17:00')
             ->timezone('Asia/Kolkata')
             ->withoutOverlapping();
 
-        // Auto-create next month trading risk plan
-        $schedule->call(function () {
-            User::where('is_active', true)->each(function ($user) {
-                app(TradingRiskManager::class)
-                    ->createNextMonthRiskPlan($user->id);
-            });
-        })
-            ->monthlyOn(1, '00:05')     // 1st day of month at 12:05 AM
-            ->withoutOverlapping();
+        // // Auto-create next month trading risk plan
+        // $schedule->call(function () {
+        //     User::where('is_active', true)->each(function ($user) {
+        //         app(TradingRiskManager::class)
+        //             ->createNextMonthRiskPlan($user->id);
+        //     });
+        // })
+        //     ->monthlyOn(1, '00:05')     // 1st day of month at 12:05 AM
+        //     ->withoutOverlapping();
 
-        // Delete expired option contracts daily at 1:00 AM
-        $schedule->command('options:delete-expired')
-            ->dailyAt('01:00')
-            ->withoutOverlapping();
+        // // Delete expired option contracts daily at 1:00 AM
+        // $schedule->command('options:delete-expired')
+        //     ->dailyAt('01:00')
+        //     ->withoutOverlapping();
     }
 
     /**
