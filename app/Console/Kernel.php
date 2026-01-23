@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     {
 
         $schedule->command('stocks:fetch-daily-prices')
-            // ->dailyAt('17:00')
+            ->everyMinute()
             ->timezone('Asia/Kolkata')
             ->withoutOverlapping();
 
