@@ -16,9 +16,9 @@ class Kernel extends ConsoleKernel
     {
 
         $schedule->command('stocks:fetch-daily-prices')
-            ->weekdays()
+            ->dailyAt('17:00')
             ->timezone('Asia/Kolkata')
-            ->at('17:00');
+            ->withoutOverlapping();
 
         // Auto-create next month trading risk plan
         $schedule->call(function () {

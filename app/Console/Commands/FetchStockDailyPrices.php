@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\TradingSymbol;
 use App\Models\StockDailyPrice;
 use App\Models\StockTip;
@@ -21,7 +22,8 @@ class FetchStockDailyPrices extends Command
         $date = $this->option('date')
             ? Carbon::parse($this->option('date'))->toDateString()
             : now('Asia/Kolkata')->toDateString();
-
+    
+        Log::info("FetchStockDailyPrices: Started for date: {$date}");
         $this->info("Fetching stock prices for date: {$date}");
 
         $symbols = TradingSymbol::where('segment', 'STOCK')
@@ -81,9 +83,12 @@ class FetchStockDailyPrices extends Command
                 // Check stock tips for this symbol and see if SL or Target is hit
                 $this->checkStockTipsForHits($symbol, $closePrice, $highPrice, $date);
             } catch (\Throwable $e) {
+                Log::error("FetchStockDailyPrices: Error for {$symbol->symbol_code}: {$e->getMessage()}");
                 $this->error("Error for {$symbol->symbol_code}: {$e->getMessage()}");
             }
         }
+
+        Log::info("FetchStockDailyPrices: Completed for date: {$date}");
 
         return Command::SUCCESS;
     }
