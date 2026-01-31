@@ -47,7 +47,7 @@ class StockTipForm
         $buy = (float) $get('buy_price');
 
         if ($buy > 0) {
-            $stopLoss = $buy - ($buy * 0.10);
+            $stopLoss = $buy - ($buy * 0.20);
             $set('stop_loss', round($stopLoss, 2));
         } else {
             $set('stop_loss', null);
@@ -139,7 +139,7 @@ class StockTipForm
                             }),
 
                         TextInput::make('stop_loss')
-                            ->label('Stop Loss (-10% from Buy Price)')
+                            ->label('Stop Loss (-20% from Buy Price)')
                             ->numeric()
                             ->required(),
 

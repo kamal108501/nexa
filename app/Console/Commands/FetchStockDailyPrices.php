@@ -10,6 +10,8 @@ use App\Models\StockDailyPrice;
 use App\Models\StockTip;
 use App\Models\StockTipResult;
 use App\Models\StockTradeExecution;
+use App\Models\User;
+use App\Notifications\StockTipNotification;
 use Carbon\Carbon;
 
 class FetchStockDailyPrices extends Command
@@ -22,7 +24,7 @@ class FetchStockDailyPrices extends Command
         $date = $this->option('date')
             ? Carbon::parse($this->option('date'))->toDateString()
             : now('Asia/Kolkata')->toDateString();
-    
+
         Log::info("FetchStockDailyPrices: Started for date: {$date}");
         $this->info("Fetching stock prices for date: {$date}");
 
@@ -44,7 +46,7 @@ class FetchStockDailyPrices extends Command
                     ]
                 );
 
-                if (! $response->successful()) {
+                if (!$response->successful()) {
                     $this->warn("Failed for {$yahooSymbol}");
                     continue;
                 }
@@ -54,7 +56,7 @@ class FetchStockDailyPrices extends Command
                     'chart.result.0.indicators.quote.0'
                 );
 
-                if (! $quote) {
+                if (!$quote) {
                     $this->warn("No data for {$yahooSymbol}");
                     continue;
                 }
@@ -68,13 +70,13 @@ class FetchStockDailyPrices extends Command
                         'price_date' => $date,
                     ],
                     [
-                        'open_price'  => $quote['open'][0]  ?? null,
-                        'high_price'  => $highPrice,
-                        'low_price'   => $quote['low'][0]   ?? null,
+                        'open_price' => $quote['open'][0] ?? null,
+                        'high_price' => $highPrice,
+                        'low_price' => $quote['low'][0] ?? null,
                         'close_price' => $closePrice,
-                        'volume'      => $quote['volume'][0] ?? null,
-                        'source'      => 'YAHOO',
-                        'is_active'   => true,
+                        'volume' => $quote['volume'][0] ?? null,
+                        'source' => 'YAHOO',
+                        'is_active' => true,
                     ]
                 );
 
@@ -82,6 +84,9 @@ class FetchStockDailyPrices extends Command
 
                 // Check stock tips for this symbol and see if SL or Target is hit
                 $this->checkStockTipsForHits($symbol, $closePrice, $highPrice, $date);
+
+                // Check for buy opportunities and send notifications
+                $this->checkBuyOpportunities($symbol, $closePrice, $date);
             } catch (\Throwable $e) {
                 Log::error("FetchStockDailyPrices: Error for {$symbol->symbol_code}: {$e->getMessage()}");
                 $this->error("Error for {$symbol->symbol_code}: {$e->getMessage()}");
@@ -170,6 +175,13 @@ class FetchStockDailyPrices extends Command
 
             // If either target or SL hit, update the stock tip
             if ($hitType && $exitPrice !== null) {
+                // Send notification before updating the tip
+                if ($hitType === 'sl_hit') {
+                    $this->sendNotificationToUsers($tip, 'stop_loss', $exitPrice);
+                } elseif ($hitType === 'completed') {
+                    $this->sendNotificationToUsers($tip, 'target_hit', $exitPrice);
+                }
+
                 $tip->update([
                     'status' => $hitType,
                     'exit_price' => $exitPrice,
@@ -214,6 +226,65 @@ class FetchStockDailyPrices extends Command
                 }
 
                 $this->info("Updated Stock Tip ID: {$tip->id} - Status: {$hitType}");
+            }
+        }
+    }
+
+    private function checkBuyOpportunities(TradingSymbol $symbol, ?float $currentPrice, string $date): void
+    {
+        if ($currentPrice === null) {
+            return;
+        }
+
+        // Get active stock tips for this symbol
+        $activeStockTips = StockTip::where('trading_symbol_id', $symbol->id)
+            ->where('status', 'active')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($activeStockTips as $tip) {
+            $buyPrice = $tip->buy_price;
+            $stopLoss = $tip->stop_loss;
+
+            // Calculate price change percentage from buy price
+            $priceChangePercent = (($currentPrice - $buyPrice) / $buyPrice) * 100;
+
+            try {
+                // Check for stop loss hit (will be handled by checkStockTipsForHits, but notify here too)
+                if ($currentPrice <= $stopLoss) {
+                    $this->sendNotificationToUsers($tip, 'stop_loss', $currentPrice);
+                    $this->warn("NOTIFICATION - STOP LOSS: {$symbol->symbol_code} at ₹{$currentPrice}");
+                }
+                // Check for strong buy signal (price dropped 15% or more from buy price)
+                elseif ($priceChangePercent <= -15) {
+                    $this->sendNotificationToUsers($tip, 'strong_buy', $currentPrice);
+                    $this->info("NOTIFICATION - STRONG BUY: {$symbol->symbol_code} at ₹{$currentPrice} ({$priceChangePercent}%)");
+                }
+                // Check for support level buy signal (price dropped 10% or more from buy price)
+                elseif ($priceChangePercent <= -10) {
+                    $this->sendNotificationToUsers($tip, 'support_buy', $currentPrice);
+                    $this->info("NOTIFICATION - SUPPORT BUY: {$symbol->symbol_code} at ₹{$currentPrice} ({$priceChangePercent}%)");
+                }
+            } catch (\Throwable $e) {
+                Log::error("Error sending notification for stock tip {$tip->id}: {$e->getMessage()}");
+            }
+        }
+    }
+
+    private function sendNotificationToUsers(StockTip $stockTip, string $type, float $currentPrice): void
+    {
+        // Send to all users who have permission to view stock tips or are admins
+        $users = User::all()
+            ->filter(function ($user) {
+                return $user->can('view_stock_tip') || $user->hasRole('admin');
+            });
+
+        foreach ($users as $user) {
+            try {
+                $user->notify(new StockTipNotification($stockTip, $type, $currentPrice));
+            } catch (\Exception $e) {
+                Log::error("Failed to send notification to user {$user->id}: {$e->getMessage()}");
+                $this->error("Failed to send notification to user {$user->id}: {$e->getMessage()}");
             }
         }
     }

@@ -14,9 +14,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-
+        // Fetch stock prices and check for notifications during market hours
+        // Indian market hours: 9:15 AM to 3:30 PM IST
         $schedule->command('stocks:fetch-daily-prices')
-            ->everyMinute()
+            ->everyFiveMinutes()
+            ->between('9:15', '15:30')
             ->timezone('Asia/Kolkata')
             ->withoutOverlapping();
 
