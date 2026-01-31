@@ -70,4 +70,9 @@ class TradingSymbolResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('view_trading_symbol') || auth()->user()->hasRole('admin');
+    }
 }

@@ -25,15 +25,20 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('/')
             ->login()
+            ->profile()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->navigationGroups([
+                NavigationGroup::make('User Management')->icon('heroicon-o-users')->collapsed(),
                 NavigationGroup::make('Trading Masters')->icon('heroicon-o-academic-cap')->collapsed(),
                 NavigationGroup::make('Options Trading')->icon('heroicon-o-rectangle-stack')->collapsed(),
                 NavigationGroup::make('Stocks Trading')->icon('heroicon-o-chart-bar')->collapsed(),
