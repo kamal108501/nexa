@@ -52,6 +52,15 @@ class StockTipsTable
                     ->numeric()
                     ->sortable()
                     ->suffix('%'),
+                TextColumn::make('term')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'short_term' => 'info',
+                        'long_term' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => ucwords(str_replace('_', ' ', $state)))
+                    ->sortable(),
                 TextColumn::make('exit_price')
                     ->label('Exit Price')
                     ->money('INR')

@@ -21,6 +21,7 @@ class StockTip extends Model
         'expiry_date',
         'expected_return_percent',
         'status',
+        'term',
         'exit_price',
         'exit_date',
         'is_active',
