@@ -247,8 +247,8 @@ class DailyTradePlanForm
                             ->default(null)
                             ->readOnly(),
                         Select::make('status')
-                            ->options(['planned' => 'Planned', 'executed' => 'Executed', 'skipped' => 'Skipped'])
-                            ->default('planned')
+                            ->options(['PLANNED' => 'Planned', 'EXECUTED' => 'Executed', 'SKIPPED' => 'Skipped'])
+                            ->default('PLANNED')
                             ->required(),
                         Textarea::make('notes')
                             ->default(null)
